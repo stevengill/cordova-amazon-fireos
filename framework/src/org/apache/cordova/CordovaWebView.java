@@ -48,15 +48,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.webkit.WebBackForwardList;
-import android.webkit.WebHistoryItem;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebSettings.LayoutAlgorithm;
+import com.amazon.android.webkit.AmazonWebBackForwardList;
+import com.amazon.android.webkit.AmazonWebHistoryItem;
+import com.amazon.android.webkit.AmazonWebChromeClient;
+import com.amazon.android.webkit.AmazonWebSettings;
+import com.amazon.android.webkit.AmazonWebView;
+import com.amazon.android.webkit.AmazonWebSettings.LayoutAlgorithm;
+import com.amazon.android.webkit.AmazonWebKitFactory;
 import android.widget.FrameLayout;
 
-public class CordovaWebView extends WebView {
+public class CordovaWebView extends AmazonWebView {
 
     public static final String TAG = "CordovaWebView";
 
@@ -91,7 +92,7 @@ public class CordovaWebView extends WebView {
 
     /** custom view created by the browser (a video player for example) */
     private View mCustomView;
-    private WebChromeClient.CustomViewCallback mCustomViewCallback;
+    private AmazonWebChromeClient.CustomViewCallback mCustomViewCallback;
 
     private ActivityResult mResult = null;
 
@@ -125,9 +126,11 @@ public class CordovaWebView extends WebView {
      */
     public CordovaWebView(Context context) {
         super(context);
+
         if (CordovaInterface.class.isInstance(context))
         {
             this.cordova = (CordovaInterface) context;
+            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
         }
         else
         {
@@ -145,9 +148,11 @@ public class CordovaWebView extends WebView {
      */
     public CordovaWebView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
         if (CordovaInterface.class.isInstance(context))
         {
             this.cordova = (CordovaInterface) context;
+            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
         }
         else
         {
@@ -169,9 +174,11 @@ public class CordovaWebView extends WebView {
      */
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
         if (CordovaInterface.class.isInstance(context))
         {
             this.cordova = (CordovaInterface) context;
+            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, false, null);
         }
         else
         {
@@ -192,10 +199,13 @@ public class CordovaWebView extends WebView {
      */
     @TargetApi(11)
     public CordovaWebView(Context context, AttributeSet attrs, int defStyle, boolean privateBrowsing) {
-        super(context, attrs, defStyle, privateBrowsing);
+        // super(context, attrs, defStyle, privateBrowsing); // DEPRECATED
+        super(context, attrs, defStyle);
+
         if (CordovaInterface.class.isInstance(context))
         {
             this.cordova = (CordovaInterface) context;
+            this.cordova.getFactory().initializeWebView(this, 0xFFFFFF, privateBrowsing, null);
         }
         else
         {
@@ -232,14 +242,14 @@ public class CordovaWebView extends WebView {
 			this.requestFocusFromTouch();
 		}
 		// Enable JavaScript
-        WebSettings settings = this.getSettings();
+        AmazonWebSettings settings = this.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
         
         // Set the nav dump for HTC 2.x devices (disabling for ICS, deprecated entirely for Jellybean 4.2)
         try {
-            Method gingerbread_getMethod =  WebSettings.class.getMethod("setNavDump", new Class[] { boolean.class });
+            Method gingerbread_getMethod =  AmazonWebSettings.class.getMethod("setNavDump", new Class[] { boolean.class });
             
             String manufacturer = android.os.Build.MANUFACTURER;
             Log.d(TAG, "CordovaWebView is running on device made by: " + manufacturer);
@@ -353,7 +363,7 @@ public class CordovaWebView extends WebView {
     }
 
     /**
-     * Set the WebChromeClient.
+     * Set the AmazonWebChromeClient.
      *
      * @param client
      */
@@ -858,20 +868,20 @@ public class CordovaWebView extends WebView {
     }
 
     // Wrapping these functions in their own class prevents warnings in adb like:
-    // VFY: unable to resolve virtual method 285: Landroid/webkit/WebSettings;.setAllowUniversalAccessFromFileURLs
+    // VFY: unable to resolve virtual method 285: Landroid/webkit/AmazonWebSettings;.setAllowUniversalAccessFromFileURLs
     @TargetApi(16)
     private static class Level16Apis {
-        static void enableUniversalAccess(WebSettings settings) {
+        static void enableUniversalAccess(AmazonWebSettings settings) {
             settings.setAllowUniversalAccessFromFileURLs(true);
         }
     }
     
     public void printBackForwardList() {
-        WebBackForwardList currentList = this.copyBackForwardList();
+        AmazonWebBackForwardList currentList = this.copyBackForwardList();
         int currentSize = currentList.getSize();
         for(int i = 0; i < currentSize; ++i)
         {
-            WebHistoryItem item = currentList.getItemAtIndex(i);
+            AmazonWebHistoryItem item = currentList.getItemAtIndex(i);
             String url = item.getUrl();
             LOG.d(TAG, "The URL at index: " + Integer.toString(i) + "is " + url );
         }
@@ -881,8 +891,8 @@ public class CordovaWebView extends WebView {
     //Can Go Back is BROKEN!
     public boolean startOfHistory()
     {
-        WebBackForwardList currentList = this.copyBackForwardList();
-        WebHistoryItem item = currentList.getItemAtIndex(0);
+        AmazonWebBackForwardList currentList = this.copyBackForwardList();
+        AmazonWebHistoryItem item = currentList.getItemAtIndex(0);
         if( item!=null){	// Null-fence in case they haven't called loadUrl yet (CB-2458)
 	        String url = item.getUrl();
 	        String currentUrl = this.getUrl();
@@ -893,7 +903,7 @@ public class CordovaWebView extends WebView {
         return false;
     }
 
-    public void showCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+    public void showCustomView(View view, AmazonWebChromeClient.CustomViewCallback callback) {
         // This code is adapted from the original Android Browser code, licensed under the Apache License, Version 2.0
         Log.d(TAG, "showing Custom View");
         // if a view already exists then immediately terminate the new one
@@ -946,10 +956,10 @@ public class CordovaWebView extends WebView {
         return mCustomView != null;
     }
     
-    public WebBackForwardList restoreState(Bundle savedInstanceState)
+    public AmazonWebBackForwardList restoreState(Bundle savedInstanceState)
     {
-        WebBackForwardList myList = super.restoreState(savedInstanceState);
-        Log.d(TAG, "WebView restoration crew now restoring!");
+        AmazonWebBackForwardList myList = super.restoreState(savedInstanceState);
+        Log.d(TAG, "AmazonWebView restoration crew now restoring!");
         //Initialize the plugin manager once more
         this.pluginManager.init();
         return myList;
