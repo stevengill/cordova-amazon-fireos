@@ -37,16 +37,16 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.util.Log;
 import android.view.View;
-import android.webkit.HttpAuthHandler;
-import android.webkit.SslErrorHandler;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import com.amazon.android.webkit.AmazonHttpAuthHandler;
+import com.amazon.android.webkit.AmazonSslErrorHandler;
+import com.amazon.android.webkit.AmazonWebResourceResponse;
+import com.amazon.android.webkit.AmazonWebView;
+import com.amazon.android.webkit.AmazonWebViewClient;
 
 /**
- * This class is the WebViewClient that implements callbacks for our web view.
+ * This class is the AmazonWebViewClient that implements callbacks for our web view.
  */
-public class CordovaWebViewClient extends WebViewClient {
+public class CordovaWebViewClient extends AmazonWebViewClient {
 
 	private static final String TAG = "CordovaWebViewClient";
 	private static final String CORDOVA_EXEC_URL_PREFIX = "http://cdv_exec/";
@@ -107,14 +107,14 @@ public class CordovaWebViewClient extends WebViewClient {
 
     /**
      * Give the host application a chance to take over the control when a new url
-     * is about to be loaded in the current WebView.
+     * is about to be loaded in the current AmazonWebView.
      *
-     * @param view          The WebView that is initiating the callback.
+     * @param view          The AmazonWebView that is initiating the callback.
      * @param url           The url to be loaded.
      * @return              true to override, false for default behavior
      */
 	@Override
-    public boolean shouldOverrideUrlLoading(WebView view, String url) {
+    public boolean shouldOverrideUrlLoading(AmazonWebView view, String url) {
     	// Check if it's an exec() bridge command message.
     	if (NativeToJsMessageQueue.ENABLE_LOCATION_CHANGE_EXEC_MODE && url.startsWith(CORDOVA_EXEC_URL_PREFIX)) {
     		handleExecUrl(url);
@@ -125,7 +125,7 @@ public class CordovaWebViewClient extends WebViewClient {
         }
 
         // If dialing phone (tel:5551212)
-        else if (url.startsWith(WebView.SCHEME_TEL)) {
+        else if (url.startsWith(AmazonWebView.SCHEME_TEL)) {
             try {
                 Intent intent = new Intent(Intent.ACTION_DIAL);
                 intent.setData(Uri.parse(url));
@@ -147,7 +147,7 @@ public class CordovaWebViewClient extends WebViewClient {
         }
 
         // If sending email (mailto:abc@corp.com)
-        else if (url.startsWith(WebView.SCHEME_MAILTO)) {
+        else if (url.startsWith(AmazonWebView.SCHEME_MAILTO)) {
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
                 intent.setData(Uri.parse(url));
@@ -233,7 +233,7 @@ public class CordovaWebViewClient extends WebViewClient {
      * @param realm
      */
     @Override
-    public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+    public void onReceivedHttpAuthRequest(AmazonWebView view, AmazonHttpAuthHandler handler, String host, String realm) {
 
         // Get the authentication token
         AuthenticationToken token = this.getAuthenticationToken(host, realm);
@@ -256,7 +256,7 @@ public class CordovaWebViewClient extends WebViewClient {
      * @param url           The url of the page.
      */
     @Override
-    public void onPageStarted(WebView view, String url, Bitmap favicon) {
+    public void onPageStarted(AmazonWebView view, String url, Bitmap favicon) {
 
         // Flush stale messages.
         this.appView.jsMessageQueue.reset();
@@ -279,7 +279,7 @@ public class CordovaWebViewClient extends WebViewClient {
      * @param url           The url of the page.
      */
     @Override
-    public void onPageFinished(WebView view, String url) {
+    public void onPageFinished(AmazonWebView view, String url) {
         super.onPageFinished(view, url);
         LOG.d(TAG, "onPageFinished(" + url + ")");
 
@@ -328,13 +328,13 @@ public class CordovaWebViewClient extends WebViewClient {
      * Report an error to the host application. These errors are unrecoverable (i.e. the main resource is unavailable).
      * The errorCode parameter corresponds to one of the ERROR_* constants.
      *
-     * @param view          The WebView that is initiating the callback.
+     * @param view          The AmazonWebView that is initiating the callback.
      * @param errorCode     The error code corresponding to an ERROR_* value.
      * @param description   A String describing the error.
      * @param failingUrl    The url that failed to load.
      */
     @Override
-    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+    public void onReceivedError(AmazonWebView view, int errorCode, String description, String failingUrl) {
         LOG.d(TAG, "CordovaWebViewClient.onReceivedError: Error code=%s Description=%s URL=%s", errorCode, description, failingUrl);
 
         // Clear timeout flag
@@ -358,13 +358,13 @@ public class CordovaWebViewClient extends WebViewClient {
      * Note that the decision may be retained for use in response to future SSL errors.
      * The default behavior is to cancel the load.
      *
-     * @param view          The WebView that is initiating the callback.
-     * @param handler       An SslErrorHandler object that will handle the user's response.
+     * @param view          The AmazonWebView that is initiating the callback.
+     * @param handler       An AmazonSslErrorHandler object that will handle the user's response.
      * @param error         The SSL error object.
      */
     @TargetApi(8)
     @Override
-    public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+    public void onReceivedSslError(AmazonWebView view, AmazonSslErrorHandler handler, SslError error) {
 
         final String packageName = this.cordova.getActivity().getPackageName();
         final PackageManager pm = this.cordova.getActivity().getPackageManager();

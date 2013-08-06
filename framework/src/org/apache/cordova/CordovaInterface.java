@@ -25,6 +25,8 @@ import org.apache.cordova.CordovaPlugin;
 
 import java.util.concurrent.ExecutorService;
 
+import com.amazon.android.webkit.AmazonWebKitFactory;
+
 /**
  * The Activity interface that is implemented by CordovaActivity.
  * It is used to isolate plugin development, and remove dependency on entire Cordova library.
@@ -69,4 +71,10 @@ public interface CordovaInterface {
      * Returns a shared thread pool that can be used for background tasks.
      */
     public ExecutorService getThreadPool();
+    
+    /**
+     * Get the WebKit factory.
+     * @return
+     */
+    public abstract AmazonWebKitFactory getFactory();
 }

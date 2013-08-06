@@ -32,23 +32,23 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.webkit.ConsoleMessage;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebStorage;
-import android.webkit.WebView;
-import android.webkit.GeolocationPermissions.Callback;
+import com.amazon.android.webkit.AmazonConsoleMessage;
+import com.amazon.android.webkit.AmazonJsPromptResult;
+import com.amazon.android.webkit.AmazonJsResult;
+import com.amazon.android.webkit.AmazonValueCallback;
+import com.amazon.android.webkit.AmazonWebChromeClient;
+import com.amazon.android.webkit.AmazonWebStorage;
+import com.amazon.android.webkit.AmazonWebView;
+import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 /**
- * This class is the WebChromeClient that implements callbacks for our web view.
+ * This class is the AmazonWebChromeClient that implements callbacks for our web view.
  */
-public class CordovaChromeClient extends WebChromeClient {
+public class CordovaChromeClient extends AmazonWebChromeClient {
 
     public static final int FILECHOOSER_RESULTCODE = 5173;
     private static final String LOG_TAG = "CordovaChromeClient";
@@ -61,7 +61,7 @@ public class CordovaChromeClient extends WebChromeClient {
     private View mVideoProgressView;
     
     // File Chooser
-    public ValueCallback<Uri> mUploadMessage;
+    public AmazonValueCallback<Uri> mUploadMessage;
     
     /**
      * Constructor.
@@ -101,7 +101,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+    public boolean onJsAlert(AmazonWebView view, String url, String message, final AmazonJsResult result) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Alert");
@@ -145,7 +145,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+    public boolean onJsConfirm(AmazonWebView view, String url, String message, final AmazonJsResult result) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Confirm");
@@ -187,8 +187,8 @@ public class CordovaChromeClient extends WebChromeClient {
 
     /**
      * Tell the client to display a prompt dialog to the user.
-     * If the client returns true, WebView will assume that the client will
-     * handle the prompt dialog and call the appropriate JsPromptResult method.
+     * If the client returns true, AmazonWebView will assume that the client will
+     * handle the prompt dialog and call the appropriate AmazonJsPromptResult method.
      *
      * Since we are hacking prompts for our own purposes, we should not be using them for
      * this purpose, perhaps we should hack console.log to do this instead!
@@ -200,7 +200,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+    public boolean onJsPrompt(AmazonWebView view, String url, String message, String defaultValue, AmazonJsPromptResult result) {
 
         // Security check to make sure any requests are coming from the page initially
         // loaded in webview and not another loaded in an iframe.
@@ -250,7 +250,7 @@ public class CordovaChromeClient extends WebChromeClient {
 
         // Show dialog
         else {
-            final JsPromptResult res = result;
+            final AmazonJsPromptResult res = result;
             AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
             dlg.setMessage(message);
             final EditText input = new EditText(this.cordova.getActivity());
@@ -290,7 +290,7 @@ public class CordovaChromeClient extends WebChromeClient {
      */
     @Override
     public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
-            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater)
+            long totalUsedQuota, AmazonWebStorage.QuotaUpdater quotaUpdater)
     {
         LOG.d(TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
 
@@ -325,7 +325,7 @@ public class CordovaChromeClient extends WebChromeClient {
 
     @TargetApi(8)
     @Override
-    public boolean onConsoleMessage(ConsoleMessage consoleMessage)
+    public boolean onConsoleMessage(AmazonConsoleMessage consoleMessage)
     {
         if (consoleMessage.message() != null)
             LOG.d(TAG, "%s: Line %d : %s" , consoleMessage.sourceId() , consoleMessage.lineNumber(), consoleMessage.message());
@@ -346,7 +346,7 @@ public class CordovaChromeClient extends WebChromeClient {
     
     // API level 7 is required for this, see if we could lower this using something else
     @Override
-    public void onShowCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+    public void onShowCustomView(View view, AmazonWebChromeClient.CustomViewCallback callback) {
         this.appView.showCustomView(view, callback);
     }
 
@@ -384,15 +384,15 @@ public class CordovaChromeClient extends WebChromeClient {
     return mVideoProgressView; 
     }
     
-    public void openFileChooser(ValueCallback<Uri> uploadMsg) {
+    public void openFileChooser(AmazonValueCallback<Uri> uploadMsg) {
         this.openFileChooser(uploadMsg, "*/*");
     }
 
-    public void openFileChooser( ValueCallback<Uri> uploadMsg, String acceptType ) {
+    public void openFileChooser( AmazonValueCallback<Uri> uploadMsg, String acceptType ) {
         this.openFileChooser(uploadMsg, acceptType, null);
     }
     
-    public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture)
+    public void openFileChooser(AmazonValueCallback<Uri> uploadMsg, String acceptType, String capture)
     {
         mUploadMessage = uploadMsg;
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -402,7 +402,7 @@ public class CordovaChromeClient extends WebChromeClient {
                 FILECHOOSER_RESULTCODE);
     }
     
-    public ValueCallback<Uri> getValueCallback() {
+    public AmazonValueCallback<Uri> getValueCallback() {
         return this.mUploadMessage;
     }
 }

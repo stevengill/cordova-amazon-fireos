@@ -27,10 +27,10 @@ import org.apache.cordova.PluginResult;
 
 import android.os.Message;
 import android.util.Log;
-import android.webkit.WebView;
+import com.amazon.android.webkit.AmazonWebView;
 
 /**
- * Holds the list of messages to be sent to the WebView.
+ * Holds the list of messages to be sent to the AmazonWebView.
  */
 public class NativeToJsMessageQueue {
     private static final String LOG_TAG = "JsMessageQueue";
@@ -337,7 +337,7 @@ public class NativeToJsMessageQueue {
     	@SuppressWarnings("rawtypes")
     	private void initReflection() {
         	Object webViewObject = webView;
-    		Class webViewClass = WebView.class;
+    		Class webViewClass = AmazonWebView.class;
         	try {
     			Field f = webViewClass.getDeclaredField("mProvider");
     			f.setAccessible(true);

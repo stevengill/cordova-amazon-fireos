@@ -53,8 +53,10 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.webkit.ValueCallback;
-import android.webkit.WebViewClient;
+import com.amazon.android.webkit.AmazonValueCallback;
+import com.amazon.android.webkit.AmazonWebViewClient;
+import com.amazon.android.webkit.AmazonWebKitFactory;
+import com.amazon.android.webkit.AmazonWebKitFactories;
 import android.widget.LinearLayout;
 
 /**
@@ -183,6 +185,9 @@ public class CordovaActivity extends Activity implements CordovaInterface {
 
     private Object LOG_TAG;
 
+    private static boolean sFactoryInit = false;
+    private AmazonWebKitFactory factory = null;
+
     /**
     * Sets the authentication token.
     *
@@ -253,6 +258,25 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         LOG.d(TAG, "CordovaActivity.onCreate()");
         super.onCreate(savedInstanceState);
 
+        if (!sFactoryInit) {
+            // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
+            // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
+            // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
+            
+            factory = AmazonWebKitFactories.getDefaultFactory();
+            if (factory.isRenderProcess(this)) {
+                return; // Do nothing if this is on render process
+            }
+            factory.initialize(this);
+
+            // factory configuration
+            factory.getCookieManager().setAcceptCookie(true);
+            
+            sFactoryInit = true;
+        } else {
+            factory = AmazonWebKitFactories.getDefaultFactory();
+        }
+
         if(savedInstanceState != null)
         {
             initCallbackClass = savedInstanceState.getString("callbackClass");
@@ -295,6 +319,15 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      */
     public Activity getActivity() {
         return this;
+    }
+    
+    /**
+     * Get the WebKit factory.
+     *
+     * @return
+     */
+    public AmazonWebKitFactory getFactory() {
+    	return this.factory;
     }
 
     /**
@@ -892,7 +925,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         super.onActivityResult(requestCode, resultCode, intent);
         Log.d(TAG, "Request code = " + requestCode);
         if (appView != null && requestCode == CordovaChromeClient.FILECHOOSER_RESULTCODE) {
-        	ValueCallback<Uri> mUploadMessage = this.appView.getWebChromeClient().getValueCallback();
+        	AmazonValueCallback<Uri> mUploadMessage = this.appView.getWebChromeClient().getValueCallback();
             Log.d(TAG, "did we get here?");
             if (null == mUploadMessage)
                 return;
@@ -946,7 +979,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         }
         // If not, then display error dialog
         else {
-            final boolean exit = !(errorCode == WebViewClient.ERROR_HOST_LOOKUP);
+            final boolean exit = !(errorCode == AmazonWebViewClient.ERROR_HOST_LOOKUP);
             me.runOnUiThread(new Runnable() {
                 public void run() {
                     if (exit) {
