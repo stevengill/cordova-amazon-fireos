@@ -59,7 +59,10 @@ import android.widget.FrameLayout;
 
 public class CordovaWebView extends AmazonWebView {
 
+    
     public static final String TAG = "CordovaWebView";
+    
+    public static final String CORDOVA_VERSION = "3.1.0-dev";
 
     private ArrayList<Integer> keyDownCodes = new ArrayList<Integer>();
     private ArrayList<Integer> keyUpCodes = new ArrayList<Integer>();
