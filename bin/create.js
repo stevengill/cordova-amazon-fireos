@@ -170,6 +170,7 @@ Log("Copying js, jar & config.xml files...");
 if(fso.FolderExists(ROOT + '\\framework')) {
     exec('%comspec% /c copy "'+ROOT+'\\framework\\assets\\www\\cordova.js" "'+PROJECT_PATH+'\\assets\\www\\cordova.js" /Y');
     exec('%comspec% /c copy "'+ROOT+'\\framework\\cordova-'+VERSION+'.jar" "'+PROJECT_PATH+'\\libs\\cordova-'+VERSION+'.jar" /Y');
+    exec('%comspec% /c copy "'+ROOT+'\\framework\\FireOS.jar" "'+PROJECT_PATH+'\\libs\\FireOS.jar" /Y');
     fso.CreateFolder(PROJECT_PATH + '\\res\\xml');
     exec('%comspec% /c copy "'+ROOT+'\\framework\\res\\xml\\config.xml" "' + PROJECT_PATH + '\\res\\xml\\config.xml" /Y');
 } else {

@@ -85,6 +85,9 @@
 		<!-- copy in cordova.jar -->
 		<copy file="${basedir}/framework/cordova-${version}.jar" todir="${project.path}/libs/" />
 
+        <!-- copy in FireOS.jar -->
+		<copy file="${basedir}/framework/FireOS.jar" todir="${project.path}/libs/" />
+        
 		<!-- copy in default activity -->
 		<copy file="${basedir}/bin/templates/Activity.java" tofile="${activity.path}" overwrite="true" />
 
