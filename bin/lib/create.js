@@ -74,6 +74,7 @@ function copyJsAndJar(projectPath, version) {
         });
     });
     shell.cp('-f', path.join(ROOT, 'framework', 'cordova-' + version + '.jar'), path.join(projectPath, 'libs', 'cordova-' + version + '.jar'));
+    shell.cp('-f', path.join(ROOT, 'framework', 'libs','FireOS.jar'), path.join(projectPath, 'libs', 'FireOS.jar'));
 }
 
 function copyScripts(projectPath) {
