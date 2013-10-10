@@ -19,6 +19,7 @@
 
 package org.apache.cordova;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -53,8 +54,9 @@ import com.amazon.android.webkit.AmazonWebHistoryItem;
 import com.amazon.android.webkit.AmazonWebChromeClient;
 import com.amazon.android.webkit.AmazonWebSettings;
 import com.amazon.android.webkit.AmazonWebView;
-import com.amazon.android.webkit.AmazonWebSettings.LayoutAlgorithm;
 import com.amazon.android.webkit.AmazonWebKitFactory;
+import com.amazon.android.webkit.android.AndroidWebKitFactory;
+
 import android.widget.FrameLayout;
 
 public class CordovaWebView extends AmazonWebView {
@@ -101,6 +103,52 @@ public class CordovaWebView extends AmazonWebView {
 
     private CordovaResourceApi resourceApi;
 
+    private static final String APPCACHE_DIR = "database";
+
+    private static final String APPCACHE_DIR_EMPTY = "NONEXISTENT_PATH";
+    private static final String SAFARI_UA = "Safari";
+    private static final String MOBILE_SAFARI_UA = "Mobile Safari";
+
+    private static final String LOCAL_STORAGE_DIR = "database";
+
+    /**
+     * Arbitrary size limit for app cache resources
+     */
+    public static final long APP_CACHE_LIMIT = (1024 * 1024 * 50);
+
+    /**
+     * An enumeration to specify the desired back-end to use when constructing
+     * the WebView.
+     */
+    public enum WebViewBackend {
+
+        /** The stock Android WebView back-end */
+        ANDROID,
+
+        /** The Chromium AmazonWebView beck-end */
+        CHROMIUM,
+
+        /**
+         * Automatically select the back-end depending on the device
+         * configuration
+         */
+        AUTOMATIC;
+
+        /**
+         * @return the Android string resource ID for the name of this back-end
+         */
+        public int getNameRes() {
+            switch (this) {
+            case ANDROID:
+                return R.string.backend_name_stock_android;
+            case CHROMIUM:
+                return R.string.backend_name_amazon_chromium;
+            case AUTOMATIC:
+            default:
+                return R.string.backend_name_unknown;
+            }
+        }
+    }
     class ActivityResult {
         
         int request;
@@ -247,8 +295,7 @@ public class CordovaWebView extends AmazonWebView {
 		// Enable JavaScript
         AmazonWebSettings settings = this.getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
-        settings.setLayoutAlgorithm(LayoutAlgorithm.NORMAL);
+        settings.setMediaPlaybackRequiresUserGesture(false);    
         
         // Set the nav dump for HTC 2.x devices (disabling for ICS, deprecated entirely for Jellybean 4.2)
         try {
@@ -279,13 +326,37 @@ public class CordovaWebView extends AmazonWebView {
         // while we do this
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
             Level16Apis.enableUniversalAccess(settings);
-        // Enable database
-        // We keep this disabled because we use or shim to get around DOM_EXCEPTION_ERROR_16
-        String databasePath = this.cordova.getActivity().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
-        settings.setDatabaseEnabled(true);
-        settings.setDatabasePath(databasePath);
         
-        settings.setGeolocationDatabasePath(databasePath);
+
+        if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
+            File appCacheDir = this.cordova.getActivity().getDir(APPCACHE_DIR, Context.MODE_PRIVATE);
+            if (appCacheDir.exists()) {
+                settings.setAppCachePath(appCacheDir.getPath());
+                settings.setAppCacheMaxSize(APP_CACHE_LIMIT);
+                settings.setAppCacheEnabled(true);
+            } else {
+                // shouldn't get here...
+                Log.e(TAG, "Unable to construct application cache directory, feature disabled");
+            }
+
+            File storageDir = this.cordova.getActivity().getDir(LOCAL_STORAGE_DIR, Context.MODE_PRIVATE);
+            if (storageDir.exists()) {
+                settings.setDatabasePath(storageDir.getPath());
+                settings.setDatabaseEnabled(true);
+                settings.setGeolocationDatabasePath(storageDir.getPath());
+            } else {
+                // shouldn't get here...
+                Log.e(TAG, "Unable to construct local storage directory, feature disabled");
+            }
+        } else {
+            // setting a custom path (as well as the max cache size) is not supported by Chromium,
+            // however setting the path to a non-null non-empty string is required for it to function
+            settings.setAppCachePath(APPCACHE_DIR_EMPTY);
+            settings.setAppCacheEnabled(true);
+            
+            // enable the local storage database normally with the Chromium back-end
+            settings.setDatabaseEnabled(true);
+        }
 
         // Enable DOM storage
         settings.setDomStorageEnabled(true);
@@ -293,12 +364,13 @@ public class CordovaWebView extends AmazonWebView {
         // Enable built-in geolocation
         settings.setGeolocationEnabled(true);
         
-        // Enable AppCache
-        // Fix for CB-2282
-        settings.setAppCacheMaxSize(5 * 1048576);
-        String pathToCache = this.cordova.getActivity().getApplicationContext().getDir("database", Context.MODE_PRIVATE).getPath();
-        settings.setAppCachePath(pathToCache);
-        settings.setAppCacheEnabled(true);
+         // Fix UserAgent string
+        String userAgent = settings.getUserAgentString();
+        if ((userAgent.indexOf(MOBILE_SAFARI_UA) == -1) && (userAgent.indexOf(SAFARI_UA) != -1)) {
+            // Replace Safari with Mobile Safari
+            userAgent = userAgent.replace(SAFARI_UA, MOBILE_SAFARI_UA);
+            settings.setUserAgentString(userAgent);
+        }
         
         // Fix for CB-1405
         // Google issue 4641
@@ -317,11 +389,28 @@ public class CordovaWebView extends AmazonWebView {
         }
         // end CB-1405
 
+        settings.setUseWideViewPort(true);
+
         pluginManager = new PluginManager(this, this.cordova);
         jsMessageQueue = new NativeToJsMessageQueue(this, cordova);
         exposedJsApi = new ExposedJsApi(pluginManager, jsMessageQueue);
         resourceApi = new CordovaResourceApi(this.getContext(), pluginManager);
         exposeJsInterface();
+    }
+    
+    /**
+     * The actual back-end used when constructing the WebView. Note that this
+     * may differ from the requested back-end depending on the device
+     * configuration.
+     * 
+     * @return either {@link WebViewBackend#AMAZON} or
+     *         {@link WebViewBackend#ANDROID}
+     */
+    static WebViewBackend getWebViewBackend(AmazonWebKitFactory factory) {
+        if (factory instanceof AndroidWebKitFactory) {
+            return WebViewBackend.ANDROID;
+        }
+        return WebViewBackend.CHROMIUM;
     }
 
 	/**
@@ -810,6 +899,7 @@ public class CordovaWebView extends AmazonWebView {
         if (!keepRunning) {
             // Pause JavaScript timers (including setInterval)
             this.pauseTimers();
+            this.onPause();
         }
         paused = true;
    
@@ -825,6 +915,8 @@ public class CordovaWebView extends AmazonWebView {
             this.pluginManager.onResume(keepRunning);
         }
 
+        //resume first and then resumeTimers
+        this.onResume();
         // Resume JavaScript timers (including setInterval)
         this.resumeTimers();
         paused = false;
