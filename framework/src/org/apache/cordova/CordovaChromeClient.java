@@ -39,7 +39,9 @@ import com.amazon.android.webkit.AmazonValueCallback;
 import com.amazon.android.webkit.AmazonWebChromeClient;
 import com.amazon.android.webkit.AmazonWebStorage;
 import com.amazon.android.webkit.AmazonWebView;
-import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
+import com.amazon.android.webkit.AmazonGeolocationPermissions;
+import com.amazon.android.webkit.AmazonMediaDeviceSettings;
+
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -53,7 +55,10 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     public static final int FILECHOOSER_RESULTCODE = 5173;
     private static final String LOG_TAG = "CordovaChromeClient";
     private String TAG = "CordovaLog";
-    private long MAX_QUOTA = 100 * 1024 * 1024;
+
+    /* Using a conservative database quota (used primarily for the stock Android back-end) */
+    private static final long DB_QUOTA = 5 * 1024 * 1024;
+    
     protected CordovaInterface cordova;
     protected CordovaWebView appView;
 
@@ -292,21 +297,16 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
             long totalUsedQuota, AmazonWebStorage.QuotaUpdater quotaUpdater)
     {
-        LOG.d(TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
+        LOG.d(TAG, "Exceeded database quota - adjusting to " + DB_QUOTA + " bytes");
 
-        if (estimatedSize < MAX_QUOTA)
-        {
-            //increase for 1Mb
-            long newQuota = estimatedSize;
-            LOG.d(TAG, "calling quotaUpdater.updateQuota newQuota: %d", newQuota);
-            quotaUpdater.updateQuota(newQuota);
+        // This function is only called on the stock Android back-end due to the default
+        // quota initializing to 0 bytes. When on Chromium-compatible devices or platforms,
+        // the quota is essentially "unlimited" given the sufficient disk space.
+        if (currentQuota < DB_QUOTA) {
+            quotaUpdater.updateQuota(DB_QUOTA);
+            
         }
-        else
-        {
-            // Set the quota to whatever it is and force an error
-            // TODO: get docs on how to handle this properly
-            quotaUpdater.updateQuota(currentQuota);
-        }
+        
     }
 
     // console.log in api level 7: http://developer.android.com/guide/developing/debug-tasks.html
@@ -332,15 +332,25 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
          return super.onConsoleMessage(consoleMessage);
     }
 
-    @Override
+    
     /**
-     * Instructs the client to show a prompt to ask the user to set the Geolocation permission state for the specified origin.
-     *
+     * Instructs the client to show a prompt to ask the user to set the Geolocation permission state for the specified
+     * origin.
+     * <p>
+     * Note- This prompt is displayed when web content from the specified origin is attempting to use the Geolocation
+     * API
+     * <ul>
+     * <li>1. getCurrentPosition(PositionCallback successCallback, PositionErrorCallback errorCallback, optional
+     * PositionOptions options)</li>
+     * <li>2. watchPosition(PositionCallback successCallback, PositionErrorCallback errorCallback, optional
+     * PositionOptions options)</li>
+     * </ul>
+     * 
      * @param origin
      * @param callback
      */
-    public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
-        super.onGeolocationPermissionsShowPrompt(origin, callback);
+    @Override
+    public void onGeolocationPermissionsShowPrompt(String origin, AmazonGeolocationPermissions.Callback callback) {
         callback.invoke(origin, true, false);
     }
     
@@ -404,5 +414,21 @@ public class CordovaChromeClient extends AmazonWebChromeClient {
     
     public AmazonValueCallback<Uri> getValueCallback() {
         return this.mUploadMessage;
+    }
+    
+    /**
+     * Notify the host application that media access is denied.
+     * <p>
+     * Note- getUserMedia() JS API is currently not supported by AmazonWebView
+     * 
+     * @param origin
+     *            The origin of the web content attempting to use the media device request api
+     * @param callback
+     *            The callback to use to set the permission state for the origin
+     */
+    @Override
+    public void onMediaDevicePermissionsShowPrompt(String origin, AmazonMediaDeviceSettings.Callback callback) {
+        // Currently, media access should always be denied
+        callback.invoke(false, true);
     }
 }
