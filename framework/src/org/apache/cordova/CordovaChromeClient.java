@@ -32,36 +32,40 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
-import android.webkit.ConsoleMessage;
-import android.webkit.JsPromptResult;
-import android.webkit.JsResult;
-import android.webkit.ValueCallback;
-import android.webkit.WebChromeClient;
-import android.webkit.WebStorage;
-import android.webkit.WebView;
-import android.webkit.GeolocationPermissions.Callback;
+import com.amazon.android.webkit.AmazonConsoleMessage;
+import com.amazon.android.webkit.AmazonJsPromptResult;
+import com.amazon.android.webkit.AmazonJsResult;
+import com.amazon.android.webkit.AmazonValueCallback;
+import com.amazon.android.webkit.AmazonWebChromeClient;
+import com.amazon.android.webkit.AmazonWebStorage;
+import com.amazon.android.webkit.AmazonGeolocationPermissions;
+import com.amazon.android.webkit.AmazonMediaDeviceSettings;
+
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
 /**
- * This class is the WebChromeClient that implements callbacks for our web view.
+ * This class is the AmazonWebChromeClient that implements callbacks for our web view.
  */
-public class CordovaChromeClient extends WebChromeClient {
+public class CordovaChromeClient extends AmazonWebChromeClient {
 
     public static final int FILECHOOSER_RESULTCODE = 5173;
     private static final String LOG_TAG = "CordovaChromeClient";
     private String TAG = "CordovaLog";
-    private long MAX_QUOTA = 100 * 1024 * 1024;
-    private CordovaInterface cordova;
-    private CordovaWebView appView;
+    /* Using a conservative database quota (used primarily for the stock Android back-end) */
+    private static final long DB_QUOTA = 5 * 1024 * 1024;
+    
+    protected CordovaInterface cordova;
+    protected CordovaWebView appView;
+
 
     // the video progress view
     private View mVideoProgressView;
     
     // File Chooser
-    public ValueCallback<Uri> mUploadMessage;
+    public AmazonValueCallback<Uri> mUploadMessage;
     
     /**
      * Constructor.
@@ -101,7 +105,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+    public boolean onJsAlert(AmazonWebView view, String url, String message, final AmazonJsResult result) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Alert");
@@ -145,7 +149,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+    public boolean onJsConfirm(AmazonWebView view, String url, String message, final AmazonJsResult result) {
         AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
         dlg.setMessage(message);
         dlg.setTitle("Confirm");
@@ -187,8 +191,8 @@ public class CordovaChromeClient extends WebChromeClient {
 
     /**
      * Tell the client to display a prompt dialog to the user.
-     * If the client returns true, WebView will assume that the client will
-     * handle the prompt dialog and call the appropriate JsPromptResult method.
+     * If the client returns true, AmazonWebView will assume that the client will
+     * handle the prompt dialog and call the appropriate AmazonJsPromptResult method.
      *
      * Since we are hacking prompts for our own purposes, we should not be using them for
      * this purpose, perhaps we should hack console.log to do this instead!
@@ -200,7 +204,7 @@ public class CordovaChromeClient extends WebChromeClient {
      * @param result
      */
     @Override
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, JsPromptResult result) {
+    public boolean onJsPrompt(AmazonWebView view, String url, String message, String defaultValue, AmazonJsPromptResult result) {
 
         // Security check to make sure any requests are coming from the page initially
         // loaded in webview and not another loaded in an iframe.
@@ -245,7 +249,7 @@ public class CordovaChromeClient extends WebChromeClient {
 
         // Show dialog
         else {
-            final JsPromptResult res = result;
+            final AmazonJsPromptResult res = result;
             AlertDialog.Builder dlg = new AlertDialog.Builder(this.cordova.getActivity());
             dlg.setMessage(message);
             final EditText input = new EditText(this.cordova.getActivity());
@@ -285,23 +289,18 @@ public class CordovaChromeClient extends WebChromeClient {
      */
     @Override
     public void onExceededDatabaseQuota(String url, String databaseIdentifier, long currentQuota, long estimatedSize,
-            long totalUsedQuota, WebStorage.QuotaUpdater quotaUpdater)
+            long totalUsedQuota, AmazonWebStorage.QuotaUpdater quotaUpdater)
     {
-        LOG.d(TAG, "onExceededDatabaseQuota estimatedSize: %d  currentQuota: %d  totalUsedQuota: %d", estimatedSize, currentQuota, totalUsedQuota);
+        LOG.d(TAG, "Exceeded database quota - adjusting to " + DB_QUOTA + " bytes");
 
-        if (estimatedSize < MAX_QUOTA)
-        {
-            //increase for 1Mb
-            long newQuota = estimatedSize;
-            LOG.d(TAG, "calling quotaUpdater.updateQuota newQuota: %d", newQuota);
-            quotaUpdater.updateQuota(newQuota);
+        // This function is only called on the stock Android back-end due to the default
+        // quota initializing to 0 bytes. When on Chromium-compatible devices or platforms,
+        // the quota is essentially "unlimited" given the sufficient disk space.
+        if (currentQuota < DB_QUOTA) {
+            quotaUpdater.updateQuota(DB_QUOTA);
+            
         }
-        else
-        {
-            // Set the quota to whatever it is and force an error
-            // TODO: get docs on how to handle this properly
-            quotaUpdater.updateQuota(currentQuota);
-        }
+        
     }
 
     // console.log in api level 7: http://developer.android.com/guide/developing/debug-tasks.html
@@ -320,28 +319,38 @@ public class CordovaChromeClient extends WebChromeClient {
 
     @TargetApi(8)
     @Override
-    public boolean onConsoleMessage(ConsoleMessage consoleMessage)
+    public boolean onConsoleMessage(AmazonConsoleMessage consoleMessage)
     {
         if (consoleMessage.message() != null)
             LOG.d(TAG, "%s: Line %d : %s" , consoleMessage.sourceId() , consoleMessage.lineNumber(), consoleMessage.message());
          return super.onConsoleMessage(consoleMessage);
     }
 
-    @Override
+    
     /**
-     * Instructs the client to show a prompt to ask the user to set the Geolocation permission state for the specified origin.
-     *
+     * Instructs the client to show a prompt to ask the user to set the Geolocation permission state for the specified
+     * origin.
+     * <p>
+     * Note- This prompt is displayed when web content from the specified origin is attempting to use the Geolocation
+     * API
+     * <ul>
+     * <li>1. getCurrentPosition(PositionCallback successCallback, PositionErrorCallback errorCallback, optional
+     * PositionOptions options)</li>
+     * <li>2. watchPosition(PositionCallback successCallback, PositionErrorCallback errorCallback, optional
+     * PositionOptions options)</li>
+     * </ul>
+     * 
      * @param origin
      * @param callback
      */
-    public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
-        super.onGeolocationPermissionsShowPrompt(origin, callback);
+    @Override
+    public void onGeolocationPermissionsShowPrompt(String origin, AmazonGeolocationPermissions.Callback callback) {
         callback.invoke(origin, true, false);
     }
     
     // API level 7 is required for this, see if we could lower this using something else
     @Override
-    public void onShowCustomView(View view, WebChromeClient.CustomViewCallback callback) {
+    public void onShowCustomView(View view, AmazonWebChromeClient.CustomViewCallback callback) {
         this.appView.showCustomView(view, callback);
     }
 
@@ -379,15 +388,15 @@ public class CordovaChromeClient extends WebChromeClient {
     return mVideoProgressView; 
     }
     
-    public void openFileChooser(ValueCallback<Uri> uploadMsg) {
+    public void openFileChooser(AmazonValueCallback<Uri> uploadMsg) {
         this.openFileChooser(uploadMsg, "*/*");
     }
 
-    public void openFileChooser( ValueCallback<Uri> uploadMsg, String acceptType ) {
+    public void openFileChooser( AmazonValueCallback<Uri> uploadMsg, String acceptType ) {
         this.openFileChooser(uploadMsg, acceptType, null);
     }
     
-    public void openFileChooser(ValueCallback<Uri> uploadMsg, String acceptType, String capture)
+    public void openFileChooser(AmazonValueCallback<Uri> uploadMsg, String acceptType, String capture)
     {
         mUploadMessage = uploadMsg;
         Intent i = new Intent(Intent.ACTION_GET_CONTENT);
@@ -397,7 +406,23 @@ public class CordovaChromeClient extends WebChromeClient {
                 FILECHOOSER_RESULTCODE);
     }
     
-    public ValueCallback<Uri> getValueCallback() {
+    public AmazonValueCallback<Uri> getValueCallback() {
         return this.mUploadMessage;
+    }
+    
+    /**
+     * Notify the host application that media access is denied.
+     * <p>
+     * Note- getUserMedia() JS API is currently not supported by AmazonWebView
+     * 
+     * @param origin
+     *            The origin of the web content attempting to use the media device request api
+     * @param callback
+     *            The callback to use to set the permission state for the origin
+     */
+    @Override
+    public void onMediaDevicePermissionsShowPrompt(String origin, AmazonMediaDeviceSettings.Callback callback) {
+        // Currently, media access should always be denied
+        callback.invoke(false, true);
     }
 }

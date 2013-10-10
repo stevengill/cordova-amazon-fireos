@@ -27,8 +27,8 @@ import org.apache.cordova.LOG;
 import android.annotation.TargetApi;
 import android.net.Uri;
 import android.os.Build;
-import android.webkit.WebResourceResponse;
-import android.webkit.WebView;
+import com.amazon.android.webkit.AmazonWebResourceResponse;
+import com.amazon.android.webkit.AmazonWebView;
 
 @TargetApi(Build.VERSION_CODES.HONEYCOMB)
 public class IceCreamCordovaWebViewClient extends CordovaWebViewClient {
@@ -44,30 +44,30 @@ public class IceCreamCordovaWebViewClient extends CordovaWebViewClient {
     }
 
     @Override
-    public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+    public AmazonWebResourceResponse shouldInterceptRequest(AmazonWebView view, String url) {
         try {
             // Check the against the white-list.
             if ((url.startsWith("http:") || url.startsWith("https:")) && !Config.isUrlWhiteListed(url)) {
                 LOG.w(TAG, "URL blocked by whitelist: " + url);
                 // Results in a 404.
-                return new WebResourceResponse("text/plain", "UTF-8", null);
+                return new AmazonWebResourceResponse("text/plain", "UTF-8", null);
             }
 
             CordovaResourceApi resourceApi = appView.getResourceApi();
             Uri origUri = Uri.parse(url);
-            // Allow plugins to intercept WebView requests.
+            // Allow plugins to intercept AmazonWebView requests.
             Uri remappedUri = resourceApi.remapUri(origUri);
             
             if (!origUri.equals(remappedUri) || needsSpecialsInAssetUrlFix(origUri)) {
                 OpenForReadResult result = resourceApi.openForRead(remappedUri, true);
-                return new WebResourceResponse(result.mimeType, "UTF-8", result.inputStream);
+                return new AmazonWebResourceResponse(result.mimeType, "UTF-8", result.inputStream);
             }
             // If we don't need to special-case the request, let the browser load it.
             return null;
         } catch (IOException e) {
             LOG.e("IceCreamCordovaWebViewClient", "Error occurred while loading a file.", e);
             // Results in a 404.
-            return new WebResourceResponse("text/plain", "UTF-8", null);
+            return new AmazonWebResourceResponse("text/plain", "UTF-8", null);
         }
     }
 

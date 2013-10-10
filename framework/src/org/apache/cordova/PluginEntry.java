@@ -23,7 +23,7 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 
 //import android.content.Context;
-//import android.webkit.WebView;
+//import com.amazon.android.webkit.AmazonWebView;
 
 /**
  * This class represents a service entry object.
