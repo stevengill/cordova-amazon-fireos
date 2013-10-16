@@ -118,10 +118,12 @@ then
     cp -r "$BUILD_PATH"/framework/res/xml "$PROJECT_PATH"/res
     cp "$BUILD_PATH"/framework/assets/www/cordova.js "$PROJECT_PATH"/assets/www/cordova.js
     cp "$BUILD_PATH"/framework/cordova-$VERSION.jar "$PROJECT_PATH"/libs/cordova-$VERSION.jar
+    cp "$BUILD_PATH"/framework/libs/FireOS.jar "$PROJECT_PATH"/libs/FireOS.jar
 else
     cp -r "$BUILD_PATH"/xml "$PROJECT_PATH"/res/xml
     cp "$BUILD_PATH"/cordova.js "$PROJECT_PATH"/assets/www/cordova.js
     cp "$BUILD_PATH"/cordova-$VERSION.jar "$PROJECT_PATH"/libs/cordova-$VERSION.jar
+    cp "$BUILD_PATH"/FireOS.jar "$PROJECT_PATH"/libs/FireOS.jar
 fi
 
 # interpolate the activity name and package
