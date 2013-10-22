@@ -1,4 +1,5 @@
 package org.apache.cordova.test;
+
 /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -18,141 +19,152 @@ package org.apache.cordova.test;
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
-
+ */
 
 import org.apache.cordova.CordovaWebView;
 import org.apache.cordova.test.actions.backbuttonmultipage;
 
 import android.test.ActivityInstrumentationTestCase2;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.BaseInputConnection;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-public class BackButtonMultiPageTest extends ActivityInstrumentationTestCase2<backbuttonmultipage> {
+public class BackButtonMultiPageTest extends
+		ActivityInstrumentationTestCase2<backbuttonmultipage> {
 
-  private int TIMEOUT = 1000;
-  backbuttonmultipage testActivity;
-  private FrameLayout containerView;
-  private LinearLayout innerContainer;
-  private CordovaWebView testView;
-  
+private final static String LOGTAG = "cordovaamzn";
+	private int TIMEOUT = 1000;
+	backbuttonmultipage testActivity;
+	private FrameLayout containerView;
+	private LinearLayout innerContainer;
+	private CordovaWebView testView;
 
-  public BackButtonMultiPageTest() {
-    super("org.apache.cordova.test", backbuttonmultipage.class);
-  }
+	private AmazonWebViewOnUiThread mUiThread;
 
-  protected void setUp() throws Exception {
-      super.setUp();
-      testActivity = this.getActivity();
-      containerView = (FrameLayout) testActivity.findViewById(android.R.id.content);
-      innerContainer = (LinearLayout) containerView.getChildAt(0);
-      testView = (CordovaWebView) innerContainer.getChildAt(0);
-  }
+	public BackButtonMultiPageTest() {
+		super("org.apache.cordova.test", backbuttonmultipage.class);
+	}
 
-  public void testPreconditions(){
-      assertNotNull(innerContainer);
-      assertNotNull(testView);
-  }
-  
-  public void testViaHref() {
-      testView.sendJavascript("window.location = 'sample2.html';");
-      sleep();
-      String url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      testView.sendJavascript("window.location = 'sample3.html';");
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample3.html"));
-      boolean didGoBack = testView.backHistory();
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      assertTrue(didGoBack);
-      didGoBack = testView.backHistory();
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("index.html"));
-      assertTrue(didGoBack);
-  }
-  
-  public void testViaLoadUrl() {
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
-      sleep();
-      String url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample3.html"));
-      boolean didGoBack = testView.backHistory();
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      assertTrue(didGoBack);
-      didGoBack = testView.backHistory();
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("index.html"));
-      assertTrue(didGoBack);
-  }
+	protected void setUp() throws Exception {
+		super.setUp();
+		testActivity = this.getActivity();
+		containerView = (FrameLayout) testActivity
+				.findViewById(android.R.id.content);
+		innerContainer = (LinearLayout) containerView.getChildAt(0);
+		testView = (CordovaWebView) innerContainer.getChildAt(0);
+		mUiThread = new AmazonWebViewOnUiThread(this, testView);
+	}
 
-  public void testViaBackButtonOnView() {
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
-      sleep();
-      String url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample3.html"));
-      BaseInputConnection viewConnection = new BaseInputConnection(testView, true);
-      KeyEvent backDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-      KeyEvent backUp = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-      viewConnection.sendKeyEvent(backDown);
-      viewConnection.sendKeyEvent(backUp);
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      viewConnection.sendKeyEvent(backDown);
-      viewConnection.sendKeyEvent(backUp);
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("index.html"));
-  }
-  
-  public void testViaBackButtonOnLayout() {
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
-      sleep();
-      String url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample3.html"));
-      BaseInputConnection viewConnection = new BaseInputConnection(containerView, true);
-      KeyEvent backDown = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-      KeyEvent backUp = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
-      viewConnection.sendKeyEvent(backDown);
-      viewConnection.sendKeyEvent(backUp);
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("sample2.html"));
-      viewConnection.sendKeyEvent(backDown);
-      viewConnection.sendKeyEvent(backUp);
-      sleep();
-      url = testView.getUrl();
-      assertTrue(url.endsWith("index.html"));
-  }
-  
-  private void sleep() {
-      try {
-          Thread.sleep(TIMEOUT);
-      } catch (InterruptedException e) {
-          fail("Unexpected Timeout");
-      }
-  }
+	public void testPreconditions() {
+		assertNotNull(innerContainer);
+		assertNotNull(testView);
+	}
+
+	public void testViaHref() {
+		testView.sendJavascript("window.location = 'sample2.html';");
+		sleep();
+		String url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		testView.sendJavascript("window.location = 'sample3.html';");
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample3.html"));
+		boolean didGoBack = mUiThread.backHistory();
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		assertTrue(didGoBack);
+		didGoBack = mUiThread.backHistory();
+		sleep();
+		url = mUiThread.getUrl();
+		Log.i(LOGTAG, "url: " + url);
+		assertTrue(url.endsWith("index.html"));
+		assertTrue(didGoBack);
+	}
+
+	public void testViaLoadUrl() {
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
+		sleep();
+		String url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample3.html"));
+		boolean didGoBack = mUiThread.backHistory();
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		assertTrue(didGoBack);
+		didGoBack = mUiThread.backHistory();
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("index.html"));
+		assertTrue(didGoBack);
+	}
+
+	public void testViaBackButtonOnView() {
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
+		sleep();
+		String url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample3.html"));
+		BaseInputConnection viewConnection = new BaseInputConnection(testView,
+				true);
+		KeyEvent backDown = new KeyEvent(KeyEvent.ACTION_DOWN,
+				KeyEvent.KEYCODE_BACK);
+		KeyEvent backUp = new KeyEvent(KeyEvent.ACTION_UP,
+				KeyEvent.KEYCODE_BACK);
+		viewConnection.sendKeyEvent(backDown);
+		viewConnection.sendKeyEvent(backUp);
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		viewConnection.sendKeyEvent(backDown);
+		viewConnection.sendKeyEvent(backUp);
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("index.html"));
+	}
+
+	public void testViaBackButtonOnLayout() {
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample2.html");
+		sleep();
+		String url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		testView.loadUrl("file:///android_asset/www/backbuttonmultipage/sample3.html");
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample3.html"));
+		BaseInputConnection viewConnection = new BaseInputConnection(
+				containerView, true);
+		KeyEvent backDown = new KeyEvent(KeyEvent.ACTION_DOWN,
+				KeyEvent.KEYCODE_BACK);
+		KeyEvent backUp = new KeyEvent(KeyEvent.ACTION_UP,
+				KeyEvent.KEYCODE_BACK);
+		viewConnection.sendKeyEvent(backDown);
+		viewConnection.sendKeyEvent(backUp);
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("sample2.html"));
+		viewConnection.sendKeyEvent(backDown);
+		viewConnection.sendKeyEvent(backUp);
+		sleep();
+		url = mUiThread.getUrl();
+		assertTrue(url.endsWith("index.html"));
+	}
+
+	private void sleep() {
+		try {
+			Thread.sleep(TIMEOUT);
+		} catch (InterruptedException e) {
+			fail("Unexpected Timeout");
+		}
+	}
 
 }
-

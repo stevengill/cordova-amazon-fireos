@@ -246,6 +246,7 @@ public class CordovaResourceApiTest extends ActivityInstrumentationTestCase2<Cor
             "x.open('GET', 'file://foo?pluginRewrite=1', false);\n" + 
             "x.send();\n" + 
             "cordova.require('cordova/exec')(null,null,'CordovaResourceApiTestPlugin1', 'foo', [x.responseText, x.status])");
+        
         execPayload = null;
         execStatus = null;
         try {

@@ -20,10 +20,11 @@ package org.apache.cordova.test.actions;
 
 import android.os.Bundle;
 import android.webkit.WebView;
-import android.webkit.GeolocationPermissions.Callback;
+import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
 
 import org.apache.cordova.*;
-import org.apache.cordova.LOG;
+
+import com.amazon.android.webkit.AmazonWebView;
 
 public class userwebview extends DroidGap {
     
@@ -45,7 +46,6 @@ public class userwebview extends DroidGap {
             LOG.d("userwebview", "TestChromeClient()");
         }
 
-        @Override
         public void onGeolocationPermissionsShowPrompt(String origin, Callback callback) {
             LOG.d("userwebview", "onGeolocationPermissionsShowPrompt(" + origin + ")");
             super.onGeolocationPermissionsShowPrompt(origin, callback);
@@ -61,15 +61,15 @@ public class userwebview extends DroidGap {
             super(arg0);
             LOG.d("userwebview", "TestViewClient()");
         }
-
+        
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(AmazonWebView view, String url) {
             LOG.d("userwebview", "shouldOverrideUrlLoading(" + url + ")");
             return super.shouldOverrideUrlLoading(view, url);
         }
-
+        
         @Override
-        public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+        public void onReceivedError(AmazonWebView view, int errorCode, String description, String failingUrl) {
             LOG.d("userwebview", "onReceivedError: Error code=" + errorCode + " Description=" + description + " URL=" + failingUrl);
             super.onReceivedError(view, errorCode, description, failingUrl);
         }

@@ -30,10 +30,14 @@ import org.apache.cordova.test.R;
 import org.apache.cordova.test.R.id;
 import org.apache.cordova.test.R.layout;
 
+import com.amazon.android.webkit.AmazonWebKitFactories;
+import com.amazon.android.webkit.AmazonWebKitFactory;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 public class CordovaWebViewTestActivity extends Activity implements CordovaInterface {
     public CordovaWebView cordovaWebView;
@@ -99,5 +103,10 @@ public class CordovaWebViewTestActivity extends Activity implements CordovaInter
             // Send destroy event to JavaScript
             cordovaWebView.handleDestroy();
         }
+    }
+
+    @Override
+    public AmazonWebKitFactory getFactory() {
+        return AmazonWebKitFactories.getDefaultFactory();
     }
 }
