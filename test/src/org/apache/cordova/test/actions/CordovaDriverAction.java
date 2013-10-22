@@ -24,10 +24,14 @@ import java.util.concurrent.ExecutorService;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CordovaPlugin;
 
+import com.amazon.android.webkit.AmazonWebKitFactories;
+import com.amazon.android.webkit.AmazonWebKitFactory;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 
 public class CordovaDriverAction extends Activity implements CordovaInterface {
@@ -73,6 +77,11 @@ public class CordovaDriverAction extends Activity implements CordovaInterface {
     public ExecutorService getThreadPool() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public AmazonWebKitFactory getFactory() {
+        return AmazonWebKitFactories.getDefaultFactory();
     }
 
 }

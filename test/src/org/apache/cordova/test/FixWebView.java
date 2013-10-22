@@ -18,10 +18,11 @@
 */
 package org.apache.cordova.test;
 
-import android.content.Context;
-import android.webkit.WebView;
+import com.amazon.android.webkit.AmazonWebView;
 
-public class FixWebView extends WebView {
+import android.content.Context;
+
+public class FixWebView extends AmazonWebView {
 
     public FixWebView(Context context) {
         super(context);

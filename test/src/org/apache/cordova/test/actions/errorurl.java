@@ -15,7 +15,7 @@
        KIND, either express or implied.  See the License for the
        specific language governing permissions and limitations
        under the License.
-*/
+ */
 package org.apache.cordova.test.actions;
 
 import android.os.Bundle;
@@ -29,6 +29,5 @@ public class errorurl extends DroidGap {
         this.setStringProperty("errorUrl", "file:///android_asset/www/htmlnotfound/error.html");
         super.loadUrl("file:///android_asset/www/htmlnotfound/index.html");
     }
-    
-    
+
 }
