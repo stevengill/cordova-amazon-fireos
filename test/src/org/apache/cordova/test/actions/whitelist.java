@@ -19,7 +19,6 @@
 package org.apache.cordova.test.actions;
 
 import android.os.Bundle;
-import android.webkit.WebView;
 
 import org.apache.cordova.*;
 import org.apache.cordova.LOG;

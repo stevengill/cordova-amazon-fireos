@@ -189,7 +189,9 @@ public class CordovaActivity extends Activity implements CordovaInterface {
     private AmazonWebKitFactory factory = null;
 
     private static final String AMAZON_WEBVIEW_LIB_PACKAGE="com.amazon.webview";
-
+    private static final String ANDROID_WEBKIT_FACTORY_MISSING = "AndroidWebKit classes are missing. Please copy android_interface.jar from AmazonWebView SDK to app's libs folder and then rebuild the app.";
+    private static final String ERROR_DIALOG_TITLE = "Application Error";
+    private static final String ERROR_DIALOG_OK_BUTTON = "OK";
     /**
     * Sets the authentication token.
     *
@@ -259,27 +261,38 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         Config.init(this);
         LOG.d(TAG, "CordovaActivity.onCreate()");
         super.onCreate(savedInstanceState);
+        try {
+        	if (!sFactoryInit) {
+                // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
+                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
+                // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
+                
+                factory = AmazonWebKitFactories.getDefaultFactory();
+                if (factory.isRenderProcess(this)) {
+                    return; // Do nothing if this is on render process
+                }
+                factory.setNativeLibraryPackage(AMAZON_WEBVIEW_LIB_PACKAGE);
+                factory.initialize(this);
+                factory.disableDeveloperTools();
+                // factory configuration
+                factory.getCookieManager().setAcceptCookie(true);
 
-        if (!sFactoryInit) {
-            // To override the default factory (Chromium-based or Android WebKit factory), uncomment one of the following lines:
-            // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.embedded.EmbeddedWebKitFactory");
-            // AmazonWebKitFactories.setDefaultFactory("com.amazon.android.webkit.android.AndroidWebKitFactory");
-            
-            factory = AmazonWebKitFactories.getDefaultFactory();
-            if (factory.isRenderProcess(this)) {
-                return; // Do nothing if this is on render process
+                sFactoryInit = true;
+            } else {
+                factory = AmazonWebKitFactories.getDefaultFactory();
             }
-            factory.setNativeLibraryPackage(AMAZON_WEBVIEW_LIB_PACKAGE);
-            factory.initialize(this);
-            factory.disableDeveloperTools();
-            // factory configuration
-            factory.getCookieManager().setAcceptCookie(true);
 
-            sFactoryInit = true;
-        } else {
-            factory = AmazonWebKitFactories.getDefaultFactory();
+        } catch (ExceptionInInitializerError e) {
+        	LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
+        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
+        } catch (NoClassDefFoundError e) {
+        	LOG.e(TAG, "WebKit factory initialization failed. Make sure you have android_interface.jar in libs folder.");
+        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
+        } catch (Exception e) {
+        	LOG.e(TAG, "WebKit factory initialization failed.");
+        	displayError(ERROR_DIALOG_TITLE, ANDROID_WEBKIT_FACTORY_MISSING, ERROR_DIALOG_OK_BUTTON, true);
         }
-
+        
         if (savedInstanceState != null)
         {
             initCallbackClass = savedInstanceState.getString("callbackClass");
@@ -375,8 +388,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
      * Create and initialize web container with default web view objects.
      */
     public void init() {
-        CordovaWebView webView = makeWebView();
-        this.init(webView, makeWebViewClient(webView), makeChromeClient(webView));
+    	if (factory != null) {
+    		CordovaWebView webView = makeWebView();
+    		this.init(webView, makeWebViewClient(webView), makeChromeClient(webView));
+    	}
     }
 
     /**
@@ -430,6 +445,10 @@ public class CordovaActivity extends Activity implements CordovaInterface {
         // Init web view if not already done
         if (this.appView == null) {
             this.init();
+            // check again if its still null then exit. Something is wrong - factory is not initialized or webview is not created
+            if (this.appView == null) {
+            	return;
+            }
         }
 
         this.splashscreenTime = this.getIntegerProperty("SplashScreenDelay", this.splashscreenTime);
@@ -1016,7 +1035,7 @@ public class CordovaActivity extends Activity implements CordovaInterface {
                                 public void onClick(DialogInterface dialog, int which) {
                                     dialog.dismiss();
                                     if (exit) {
-                                        me.endActivity();
+                                        endActivity();
                                     }
                                 }
                             });

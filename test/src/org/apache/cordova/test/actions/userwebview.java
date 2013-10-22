@@ -19,11 +19,11 @@
 package org.apache.cordova.test.actions;
 
 import android.os.Bundle;
-import android.webkit.WebView;
-import android.webkit.GeolocationPermissions.Callback;
-
+import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
 import org.apache.cordova.*;
 import org.apache.cordova.LOG;
+
+import com.amazon.android.webkit.AmazonWebView;
 
 public class userwebview extends DroidGap {
     

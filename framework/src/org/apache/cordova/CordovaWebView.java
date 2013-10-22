@@ -52,10 +52,10 @@ import android.view.inputmethod.InputMethodManager;
 import com.amazon.android.webkit.AmazonWebBackForwardList;
 import com.amazon.android.webkit.AmazonWebHistoryItem;
 import com.amazon.android.webkit.AmazonWebChromeClient;
+import com.amazon.android.webkit.AmazonWebKitFactories;
 import com.amazon.android.webkit.AmazonWebSettings;
 import com.amazon.android.webkit.AmazonWebView;
 import com.amazon.android.webkit.AmazonWebKitFactory;
-import com.amazon.android.webkit.android.AndroidWebKitFactory;
 
 import android.widget.FrameLayout;
 
@@ -108,6 +108,7 @@ public class CordovaWebView extends AmazonWebView {
     private static final String APPCACHE_DIR_EMPTY = "NONEXISTENT_PATH";
     private static final String SAFARI_UA = "Safari";
     private static final String MOBILE_SAFARI_UA = "Mobile Safari";
+    private static final String CORDOVA_AMAZON_FIREOS_UA = "cordova-amazon-fireos/" + CORDOVA_VERSION;
 
     private static final String LOCAL_STORAGE_DIR = "database";
 
@@ -326,10 +327,9 @@ public class CordovaWebView extends AmazonWebView {
         // while we do this
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
             Level16Apis.enableUniversalAccess(settings);
-        
-
+                
         if (getWebViewBackend(this.cordova.getFactory()) == WebViewBackend.ANDROID) {
-            File appCacheDir = this.cordova.getActivity().getDir(APPCACHE_DIR, Context.MODE_PRIVATE);
+        	File appCacheDir = this.cordova.getActivity().getDir(APPCACHE_DIR, Context.MODE_PRIVATE);
             if (appCacheDir.exists()) {
                 settings.setAppCachePath(appCacheDir.getPath());
                 settings.setAppCacheMaxSize(APP_CACHE_LIMIT);
@@ -369,9 +369,10 @@ public class CordovaWebView extends AmazonWebView {
         if ((userAgent.indexOf(MOBILE_SAFARI_UA) == -1) && (userAgent.indexOf(SAFARI_UA) != -1)) {
             // Replace Safari with Mobile Safari
             userAgent = userAgent.replace(SAFARI_UA, MOBILE_SAFARI_UA);
-            settings.setUserAgentString(userAgent);
         }
-        
+        userAgent = userAgent.concat(" " + CORDOVA_AMAZON_FIREOS_UA); 
+        settings.setUserAgentString(userAgent);
+
         // Fix for CB-1405
         // Google issue 4641
         this.updateUserAgentString();
@@ -407,10 +408,13 @@ public class CordovaWebView extends AmazonWebView {
      *         {@link WebViewBackend#ANDROID}
      */
     static WebViewBackend getWebViewBackend(AmazonWebKitFactory factory) {
-        if (factory instanceof AndroidWebKitFactory) {
-            return WebViewBackend.ANDROID;
+    	// This is to figure out if WebView is using Chromium based webapp runtime or stock AndroidWebView.
+    	// On Kindle devices default is Chromium based. There is no public API to figure out the difference. 
+    	// EmbeddedWebKitFactory is not a plublic class so only way to check is using this AmazonWebKitFactories.EMBEDDED_FACTORY class name.
+    	if (factory.getClass().getName().equals(AmazonWebKitFactories.EMBEDDED_FACTORY) ) {
+            return WebViewBackend.CHROMIUM;
         }
-        return WebViewBackend.CHROMIUM;
+        return WebViewBackend.ANDROID;
     }
 
 	/**
