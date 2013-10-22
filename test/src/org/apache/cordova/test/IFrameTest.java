@@ -40,6 +40,7 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
     private FrameLayout containerView;
     private LinearLayout innerContainer;
     private CordovaWebView testView;
+    private AmazonWebViewOnUiThread mUiThread;
     private TouchUtils touch;
     private Purity touchTool;
     
@@ -55,6 +56,7 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
       containerView = (FrameLayout) testActivity.findViewById(android.R.id.content);
       innerContainer = (LinearLayout) containerView.getChildAt(0);
       testView = (CordovaWebView) innerContainer.getChildAt(0);
+      mUiThread = new AmazonWebViewOnUiThread(this, testView);
       touch = new TouchUtils();
       touchTool = new Purity(testActivity, getInstrumentation());
     }
@@ -66,7 +68,7 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
         sleep(3000);
         testView.sendJavascript("loadUrl('index2.html')");
         sleep(1000);
-        String url = testView.getUrl();
+        String url = mUiThread.getUrl();
         assertTrue(url.endsWith("index.html"));
     }
     
@@ -76,8 +78,8 @@ public class IFrameTest extends ActivityInstrumentationTestCase2 {
         sleep(3000);
         testView.sendJavascript("loadUrl('index2.html')");
         sleep(1000);
-        String url = testView.getUrl();
-        testView.backHistory();
+        String url = mUiThread.getUrl();
+        mUiThread.backHistory();
         sleep(1000);
         assertTrue(url.endsWith("index.html"));
     }

@@ -31,8 +31,8 @@ import android.graphics.Picture;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
-import android.webkit.WebView;
 
+import com.amazon.android.webkit.AmazonWebView;
 
 public class Purity {
 
@@ -135,13 +135,13 @@ public class Purity {
         }
     }
     
-    public void setBitmap(WebView view)
+    public void setBitmap(AmazonWebView view)
     {
         Picture p = view.capturePicture();
         state = Bitmap.createBitmap(p.getWidth(), p.getHeight(), Bitmap.Config.ARGB_8888);
     }
     
-    public boolean checkRenderView(WebView view)
+    public boolean checkRenderView(AmazonWebView view)
     {
         if(state == null)
         {

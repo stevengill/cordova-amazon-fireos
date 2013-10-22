@@ -21,7 +21,8 @@ package org.apache.cordova.test.actions;
 import android.os.Bundle;
 
 import org.apache.cordova.*;
-import org.apache.cordova.LOG;
+
+import com.amazon.android.webkit.AmazonWebView;
 
 public class whitelist extends DroidGap {
     @Override
@@ -39,9 +40,9 @@ public class whitelist extends DroidGap {
         public TestViewClient(DroidGap arg0) {
             super(arg0);
         }
-
+        
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(AmazonWebView view, String url) {
             LOG.d("whitelist", "shouldOverrideUrlLoading(" + url + ")");
             LOG.d("whitelist", "originalUrl=" + view.getOriginalUrl());
             return super.shouldOverrideUrlLoading(view, url);
