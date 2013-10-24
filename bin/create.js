@@ -168,7 +168,7 @@ Log("Copying js, jar & config.xml files...");
 if(fso.FolderExists(ROOT + '\\framework')) {
     exec('%comspec% /c copy "'+ROOT+'\\framework\\assets\\www\\cordova.js" "'+PROJECT_PATH+'\\assets\\www\\cordova.js" /Y');
     exec('%comspec% /c copy "'+ROOT+'\\framework\\cordova-'+VERSION+'.jar" "'+PROJECT_PATH+'\\libs\\cordova-'+VERSION+'.jar" /Y');
-    exec('%comspec% /c copy "'+ROOT+'\\framework\\libs\\FireOS.jar" "'+PROJECT_PATH+'\\libs\\FireOS.jar" /Y');
+    exec('%comspec% /c copy "'+ROOT+'\\framework\\libs\\awv_interface.jar" "'+PROJECT_PATH+'\\libs\\awv_interface.jar" /Y');
     fso.CreateFolder(PROJECT_PATH + '\\res\\xml');
     exec('%comspec% /c copy "'+ROOT+'\\framework\\res\\xml\\config.xml" "' + PROJECT_PATH + '\\res\\xml\\config.xml" /Y');
 } else {
@@ -177,7 +177,7 @@ if(fso.FolderExists(ROOT + '\\framework')) {
     // copy in cordova.jar
     exec('%comspec% /c copy "'+ROOT+'\\cordova-'+VERSION+'.jar" "'+PROJECT_PATH+'\\libs\\cordova-'+VERSION+'.jar" /Y');
     // copy in FireOS.jar
-    exec('%comspec% /c copy "'+ROOT+'\\FireOS.jar" "'+PROJECT_PATH+'\\libs\\FireOS.jar" /Y');
+    exec('%comspec% /c copy "'+ROOT+'\\awv_interface.jar" "'+PROJECT_PATH+'\\libs\\awv_interface.jar" /Y');
     // copy in xml
     fso.CreateFolder(PROJECT_PATH + '\\res\\xml');
     exec('%comspec% /c copy "'+ROOT+'\\xml\\config.xml" "' + PROJECT_PATH + '\\res\\xml\\config.xml" /Y');

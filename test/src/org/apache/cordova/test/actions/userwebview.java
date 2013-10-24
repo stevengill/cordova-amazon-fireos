@@ -19,7 +19,6 @@
 package org.apache.cordova.test.actions;
 
 import android.os.Bundle;
-import android.webkit.WebView;
 import com.amazon.android.webkit.AmazonGeolocationPermissions.Callback;
 
 import org.apache.cordova.*;

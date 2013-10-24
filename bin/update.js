@@ -129,14 +129,14 @@ WScript.Echo("Copying js, jar & config.xml files...");
 if(fso.FolderExists(ROOT + '\\framework')) {
     exec('%comspec% /c copy "'+ROOT+'"\\framework\\assets\\www\\cordova-'+VERSION+'.js '+PROJECT_PATH+'\\assets\\www\\cordova-'+VERSION+'.js /Y');
     exec('%comspec% /c copy "'+ROOT+'"\\framework\\cordova-'+VERSION+'.jar '+PROJECT_PATH+'\\libs\\cordova-'+VERSION+'.jar /Y');
-    exec('%comspec% /c copy "'+ROOT+'"\\framework\\libs\\FireOS.jar '+PROJECT_PATH+'\\libs\\FireOS.jar /Y');
+    exec('%comspec% /c copy "'+ROOT+'"\\framework\\libs\\awv_interface.jar '+PROJECT_PATH+'\\libs\\awv_interface.jar /Y');
 } else {
     // copy in cordova.js
     exec('%comspec% /c copy "'+ROOT+'"\\cordova-'+VERSION+'.js '+PROJECT_PATH+'\\assets\\www\\cordova-'+VERSION+'.js /Y');
     // copy in cordova.jar
     exec('%comspec% /c copy "'+ROOT+'"\\cordova-'+VERSION+'.jar '+PROJECT_PATH+'\\libs\\cordova-'+VERSION+'.jar /Y');
      // copy in FireOS.jar
-    exec('%comspec% /c copy "'+ROOT+'"\\FireOS.jar '+PROJECT_PATH+'\\libs\\FireOS.jar /Y');
+    exec('%comspec% /c copy "'+ROOT+'"\\awv_interface.jar '+PROJECT_PATH+'\\libs\\awv_interface.jar /Y');
     // copy in xml
 }
 

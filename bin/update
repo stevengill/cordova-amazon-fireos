@@ -108,11 +108,11 @@ if [ -d "$BUILD_PATH"/framework ]
 then
     cp "$BUILD_PATH"/framework/assets/www/cordova.js "$PROJECT_PATH"/assets/www/cordova.js
     cp "$BUILD_PATH"/framework/cordova-$VERSION.jar "$PROJECT_PATH"/libs/cordova-$VERSION.jar
-    cp "$BUILD_PATH"/framework/libs/FireOS.jar "$PROJECT_PATH"/libs/FireOS.jar
+    cp "$BUILD_PATH"/framework/libs/awv_interface.jar "$PROJECT_PATH"/libs/awv_interface.jar
 else
     cp "$BUILD_PATH"/cordova.js "$PROJECT_PATH"/assets/www/cordova.js
     cp "$BUILD_PATH"/cordova-$VERSION.jar "$PROJECT_PATH"/libs/cordova-$VERSION.jar
-    cp "$BUILD_PATH"/FireOS.jar "$PROJECT_PATH"/libs/FireOS.jar
+    cp "$BUILD_PATH"/awv_interface.jar "$PROJECT_PATH"/libs/awv_interface.jar
 fi
 
 # creating cordova folder and copying run/build/log/launch scripts

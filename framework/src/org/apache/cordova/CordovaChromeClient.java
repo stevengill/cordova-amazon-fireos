@@ -32,6 +32,7 @@ import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import com.amazon.android.webkit.AmazonWebView;
 import com.amazon.android.webkit.AmazonConsoleMessage;
 import com.amazon.android.webkit.AmazonJsPromptResult;
 import com.amazon.android.webkit.AmazonJsResult;
