@@ -18,12 +18,11 @@
 # under the License.
 #
 -->
-Cordova Android
+Cordova Amazon Fire OS
 ===
 
-Cordova Android is an Android application library that allows for Cordova-based
-projects to be built for the Android Platform. Cordova based applications are,
-at the core, applications written with web technology: HTML, CSS and JavaScript. 
+Cordova Amazon Fire OS is an application library that allows for Cordova-based
+projects to be built for the Amazon Fire OS Platform. It uses Amazon's web app runtime that is built on open-source Chromium project. With the web app runtime, your web apps can achieve fluidity and speed approaching that of native apps. 
 
 [Apache Cordova](http://cordova.io) is a project at The Apache Software Foundation (ASF).
 
@@ -34,38 +33,39 @@ Requires
 - Java JDK 1.5 or greater
 - Apache ANT 1.8.0 or greater
 - Android SDK [http://developer.android.com](http://developer.android.com)
-
+- Amazon WebView SDK [https://developer.integ.amazon.com/sdk/fire/IntegratingAWV.html#installawv](https://developer.integ.amazon.com/sdk/fire/IntegratingAWV.html#installawv)
  
-Cordova Android Developer Tools
+Cordova Amazon Fire OS Developer Tools
 ---
 
 The Cordova developer tooling is split between general tooling and project level tooling. 
 
 General Commands
 
-    ./bin/create [path package activity] ... create the ./example app or a cordova android project
-    ./bin/check_reqs ....................... checks that your environment is set up for cordova-android development
-    ./bin/update [path] .................... updates an existing cordova-android project to the version of the framework
+    ./bin/create [path package activity] ... create the ./example app or a cordova-amazon-fireos project
+    ./bin/check_reqs ....................... checks that your environment is set up for cordova-amazon-fireos development
+    ./bin/update [path] .................... updates an existing cordova-amazon-fireos project to the version of the framework
 
 Project Commands
 
-These commands live in a generated Cordova Android project. Any interactions with the emulator require you to have an AVD defined.
+These commands live in a generated Cordova Amazon Fire OS project. Emulator support is currently not available.
 
     ./cordova/clean ........................ cleans the project
     ./cordova/build ........................ calls `clean` then compiles the project
-    ./cordova/log   ........................ stream device or emulate logs to stdout
-    ./cordova/run   ........................ calls `build` then deploys to a connected Android device. If no Android device is detected, will launch an emulator and deploy to it.
-    ./cordova/version ...................... returns the cordova-android version of the current project
+    ./cordova/log   ........................ stream device logs to stdout
+    ./cordova/run   ........................ calls `build` then deploys to a connected Amazon device. 
+    ./cordova/version ...................... returns the cordova-amazon-fireos version of the current project
 
-Importing a Cordova Android Project into Eclipse
+Importing a Cordova Amazon Fire OS Project into Eclipse
 ----
 
 1. File > New > Project...
 2. Android > Android Project
-3. Create project from existing source (point to the generated app found in tmp/android)
+3. Create project from existing source (point to the generated app found in platforms/amazon-fireos)
 4. Right click on libs/cordova.jar and add to build path
-5. Right click on the project root: Run as > Run Configurations
-6. Click on the Target tab and select Manual (this way you can choose the emulator or device to build to)
+5  Right click on libs/awv_interface.jar and add to build path
+6. Right click on the project root: Run as > Run Configurations
+7. Click on the Target tab and select Manual (this way you can choose the device to build to)
 
 Building without the Tooling
 ---
@@ -78,14 +78,10 @@ To create your `cordova.jar` file, run in the framework directory:
     android update project -p . -t android-17
     ant jar
 
-
-Running Tests
-----
-Please see details under test/README.md.
-
 Further Reading
 ---
-
+- [https://developer.integ.amazon.com/sdk/fire.html] (https://developer.integ.amazon.com/sdk/fire.html)
 - [http://developer.android.com](http://developer.android.com)
 - [http://cordova.apache.org/](http://cordova.apache.org)
 - [http://wiki.apache.org/cordova/](http://wiki.apache.org/cordova/)
+
