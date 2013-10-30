@@ -62,6 +62,8 @@ import android.widget.FrameLayout;
 public class CordovaWebView extends AmazonWebView {
 
     public static final String TAG = "CordovaWebView";
+    
+    public static final String CORDOVA_VERSION = "3.0.0";
 
     private ArrayList<Integer> keyDownCodes = new ArrayList<Integer>();
     private ArrayList<Integer> keyUpCodes = new ArrayList<Integer>();
@@ -132,21 +134,8 @@ public class CordovaWebView extends AmazonWebView {
          */
         AUTOMATIC;
 
-        /**
-         * @return the Android string resource ID for the name of this back-end
-         */
-        public int getNameRes() {
-            switch (this) {
-            case ANDROID:
-                return R.string.backend_name_stock_android;
-            case CHROMIUM:
-                return R.string.backend_name_amazon_chromium;
-            case AUTOMATIC:
-            default:
-                return R.string.backend_name_unknown;
-            }
-        }
     }
+    
     class ActivityResult {
         
         int request;
