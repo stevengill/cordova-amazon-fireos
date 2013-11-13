@@ -34,7 +34,6 @@ import android.widget.LinearLayout;
 public class BackButtonMultiPageTest extends
 		ActivityInstrumentationTestCase2<backbuttonmultipage> {
 
-private final static String LOGTAG = "cordovaamzn";
 	private int TIMEOUT = 1000;
 	backbuttonmultipage testActivity;
 	private FrameLayout containerView;
@@ -50,6 +49,8 @@ private final static String LOGTAG = "cordovaamzn";
 	protected void setUp() throws Exception {
 		super.setUp();
 		testActivity = this.getActivity();
+		// Sleep to make sure main page is properly loaded
+		sleep();
 		containerView = (FrameLayout) testActivity
 				.findViewById(android.R.id.content);
 		innerContainer = (LinearLayout) containerView.getChildAt(0);
@@ -78,8 +79,7 @@ private final static String LOGTAG = "cordovaamzn";
 		assertTrue(didGoBack);
 		didGoBack = mUiThread.backHistory();
 		sleep();
-		url = mUiThread.getUrl();
-		Log.i(LOGTAG, "url: " + url);
+		url = mUiThread.getUrl();		
 		assertTrue(url.endsWith("index.html"));
 		assertTrue(didGoBack);
 	}
