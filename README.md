@@ -33,7 +33,7 @@ Requires
 - Java JDK 1.5 or greater
 - Apache ANT 1.8.0 or greater
 - Android SDK [http://developer.android.com](http://developer.android.com)
-- Amazon WebView SDK [https://developer.integ.amazon.com/sdk/fire/IntegratingAWV.html#installawv](https://developer.integ.amazon.com/sdk/fire/IntegratingAWV.html#installawv)
+- Amazon WebView SDK [https://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv](https://developer.amazon.com/sdk/fire/IntegratingAWV.html#installawv)
  
 Cordova Amazon Fire OS Developer Tools
 ---
@@ -80,7 +80,7 @@ To create your `cordova.jar` file, run in the framework directory:
 
 Further Reading
 ---
-- [https://developer.integ.amazon.com/sdk/fire.html] (https://developer.integ.amazon.com/sdk/fire.html)
+- [https://developer.amazon.com/sdk/fire.html] (https://developer.amazon.com/sdk/fire.html)
 - [http://developer.android.com](http://developer.android.com)
 - [http://cordova.apache.org/](http://cordova.apache.org)
 - [http://wiki.apache.org/cordova/](http://wiki.apache.org/cordova/)
